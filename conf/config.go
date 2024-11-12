@@ -2,6 +2,7 @@ package conf
 
 import (
 	"gopkg.in/ini.v1"
+	"mall/dao"
 	"strings"
 )
 
@@ -31,6 +32,7 @@ var (
 	AvatarPath  string
 )
 
+// Init init config and db conncection
 func Init() {
 	//本地文件中读取环境变量
 	file, err := ini.Load("./conf/config.ini") //加载配置文件
@@ -45,12 +47,12 @@ func Init() {
 	LoadPhotoPath(file)
 
 	//mysql的读写分离
-	//mysql 读 主
+	//mysql 读 主,构建用于读取数据的mysql连接的字符串
 	pathRead := strings.Join([]string{DbUser, ":", DbPassword, "@tcp(", DbHost, ":", DbPort, ")/", DbName, "?charset=utf8mb4&parseTime=True&loc=Local"}, "")
 
-	//mysql 写 (主从复制)
+	//mysql 写 (主从复制)，构建用于写的myslq的字符串
 	pathWrite := strings.Join([]string{DbUser, ":", DbPassword, "@tcp(", DbHost, ":", DbPort, ")/", DbName, "?charset=utf8mb4&parseTime=True&loc=Local"}, "")
-
+	//传入读写连接字符串以初始化数据库连接
 	dao.Database(pathRead, pathWrite)
 
 }

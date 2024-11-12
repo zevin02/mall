@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"mall/conf"
+)
 
 func main() {
-	fmt.Println("hello world")
+	conf.Init()
+	fmt.Println("finish")
 }
