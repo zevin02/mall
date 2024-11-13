@@ -22,14 +22,15 @@ func NewUserDaoByDB(db *gorm.DB) *UserDao {
 func (dao *UserDao) ExistOrNotByUserName(username string) (user *model.User, exist bool, err error) {
 	//model指定要查看的模型，
 	//find将查询的结果存储到user中
-
-	err = dao.DB.Model(&model.User{}).Where("user_name=?", username).Find(&user).Error
+	var count int64
+	err = dao.DB.Model(&model.User{}).Where("user_name=?", username).Find(&user).Count(&count).Error
 	//如果没有找到用户或者用户为空
-	if user != nil || err == gorm.ErrRecordNotFound {
+	if count == 0 {
+		//count=0说明没有找到
 		return nil, false, nil
 	}
-	//find it
-	return user, false, err
+	//find it,把查询到的数据进行返回
+	return user, true, err
 
 }
 

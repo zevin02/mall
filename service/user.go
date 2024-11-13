@@ -81,3 +81,46 @@ func (service UserService) Register(ctx context.Context) serializer.Response {
 	}
 
 }
+
+func (service UserService) Login(ctx context.Context) serializer.Response {
+	var user *model.User
+	code := e.SUCCESS
+	userDao := dao.NewUserDao(ctx)
+	//判断用户是否存在
+	user, exist, err := userDao.ExistOrNotByUserName(service.UserName)
+	if !exist || err != nil {
+		code = e.ErrorExistUserName
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Data:   "用户不存在，请先注册",
+		}
+	}
+	//验证密码
+	if user.CheckPassWord(service.Password) == false {
+		code = e.ErrorNotCompare
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Data:   "密码错误，请重新登陆",
+		}
+	}
+	//每次登陆都要把token(携带一个认证的东西)分发给到用户，http是一个无状态的，一次请求，不会保存后续的状态
+	//toekn的签发
+	token, err := util.GenerateToken(user.ID, user.UserName, 0) //普通人设置权限为0
+	if err != nil {
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Data:   "密码错误，请重新登陆",
+		}
+	}
+	//shioken
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.TokenData{User: serializer.BuildUser(user), Token: token},
+	}
+
+}

@@ -24,7 +24,7 @@ const (
 )
 
 // SetPassword 传入的是原始的密码，表中存储的是用户的加密后的密码
-func (user User) SetPassword(password string) error {
+func (user *User) SetPassword(password string) error {
 	//生成密码的摘要
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), PasswordCost)
 	if err != nil {
@@ -32,4 +32,10 @@ func (user User) SetPassword(password string) error {
 	}
 	user.PasswordDigest = string(bytes)
 	return nil
+}
+
+func (user *User) CheckPassWord(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte(password)) //将用户输入的密码和数据库中的密码进行比较
+	return err == nil
+
 }
