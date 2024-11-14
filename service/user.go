@@ -7,6 +7,7 @@ import (
 	"mall/pkg/e"
 	"mall/pkg/util"
 	"mall/serializer"
+	"mime/multipart"
 )
 
 type UserService struct {
@@ -144,6 +145,47 @@ func (service *UserService) Update(ctx context.Context, uId uint) serializer.Res
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
+	}
+
+}
+
+func (service *UserService) Post(ctx context.Context, id uint, file multipart.File, size int64) serializer.Response {
+	code := e.SUCCESS
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserById(id)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	//保存图片在本地
+	path, err := UploadAvatarToLocalStatic(file, id, user.UserName)
+
+	if err != nil {
+		code = e.ErrorUploadFail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	user.Avatar = path //把当前图片存储的路径存储起来就行
+	err = userDao.UpdateUserById(id, user)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
 		}
 	}
 	return serializer.Response{

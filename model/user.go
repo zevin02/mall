@@ -13,7 +13,7 @@ type User struct {
 	PasswordDigest string //
 	NickName       string
 	Status         string //用户状态，是否被封禁
-	Avatar         string
+	Avatar         string //存储的是图片的路径
 	Money          string //钱是密文，所以用string
 }
 

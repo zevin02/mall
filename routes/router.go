@@ -32,6 +32,7 @@ func NewRouter() *gin.Engine {
 		authed.Use(middleware.JWTAuth()) //使用jwt中间件
 		{
 			authed.POST("user/update", api.UserUpdate)
+			authed.POST("user/avatar", api.UploadAvatar)
 		}
 
 	}
