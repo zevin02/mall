@@ -16,6 +16,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+// 签发token
 func GenerateToken(id uint, userName string, authority int) (string, error) {
 	nowTime := time.Now()
 	expireTime := nowTime.Add(24 * time.Hour) //must be expired or be dangerous
@@ -33,4 +34,21 @@ func GenerateToken(id uint, userName string, authority int) (string, error) {
 	token, err := tokenClaims.SignedString(jwtSecret) //token生成
 	return token, err
 
+}
+
+// ParseToken 验证用户的token，解析JWT令牌并返回声明的信息
+func ParseToken(token string) (*Claims, error) {
+	//
+	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+	//检查解析是否成功
+	if tokenClaims != nil {
+		//尝试将Claims转化成Claims类型，并检查令牌的有小型
+		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+			return claims, nil
+		}
+	}
+	//解析失败
+	return nil, err
 }

@@ -9,4 +9,5 @@ const (
 	ErrorExistUserName = 10003
 	ErrorNotCompare    = 1004
 	ErrorAuthToken     = 1005
+	ErrorExpiredToken  = 1006
 )

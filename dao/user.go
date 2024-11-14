@@ -35,8 +35,19 @@ func (dao *UserDao) ExistOrNotByUserName(username string) (user *model.User, exi
 }
 
 // CreateUser 创建一个用户,传入指针就不用发生一个拷贝
-func (dao UserDao) CreateUser(user *model.User) error {
+func (dao *UserDao) CreateUser(user *model.User) error {
 	//直接这样创建即可
 	return dao.DB.Model(&model.User{}).Create(&user).Error
 
+}
+
+func (dao *UserDao) GetUserById(id uint) (user *model.User, err error) {
+	//First 用于检索满足条件的第一条记录
+	err = dao.DB.Model(&model.User{}).Where("id=?", id).First(&user).Error
+	return user, err
+}
+
+func (dao *UserDao) UpdateUserById(id uint, user *model.User) error {
+	err := dao.Model(&model.User{}).Where("id=?", id).Updates(user).Error
+	return err
 }

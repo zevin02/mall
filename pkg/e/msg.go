@@ -9,6 +9,7 @@ var MsgFlags = map[int]string{
 	ErrorExistUserName: "用户已存在",
 	ErrorNotCompare:    "密码错误",
 	ErrorAuthToken:     "token验证失败",
+	ErrorExpiredToken:  "token过期",
 }
 
 // GetMsg 获取状态码对应信息

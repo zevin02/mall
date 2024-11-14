@@ -25,6 +25,15 @@ func NewRouter() *gin.Engine {
 		})
 		v1.POST("user/register", api.UserRegister)
 		v1.POST("user/login", api.UserLogin)
+
+		//
+		authed := v1.Group("/") //需要登陆保护
+		//意味着authed这个路由组下的所有请求都需要经过JWTAuth中间件
+		authed.Use(middleware.JWTAuth()) //使用jwt中间件
+		{
+			authed.POST("user/update", api.UserUpdate)
+		}
+
 	}
 	return r
 }

@@ -17,7 +17,7 @@ type UserService struct {
 }
 
 // Register 用户注册函数,里面包含了从gin里面提取的请求参数
-func (service UserService) Register(ctx context.Context) serializer.Response {
+func (service *UserService) Register(ctx context.Context) serializer.Response {
 	code := e.SUCCESS
 	//密钥
 	if service.Key == "" || len(service.Key) != 16 {
@@ -82,7 +82,7 @@ func (service UserService) Register(ctx context.Context) serializer.Response {
 
 }
 
-func (service UserService) Login(ctx context.Context) serializer.Response {
+func (service *UserService) Login(ctx context.Context) serializer.Response {
 	var user *model.User
 	code := e.SUCCESS
 	userDao := dao.NewUserDao(ctx)
@@ -121,6 +121,35 @@ func (service UserService) Login(ctx context.Context) serializer.Response {
 		Status: code,
 		Msg:    e.GetMsg(code),
 		Data:   serializer.TokenData{User: serializer.BuildUser(user), Token: token},
+	}
+
+}
+
+// 修改用户信息
+func (service *UserService) Update(ctx context.Context, uId uint) serializer.Response {
+	var user *model.User
+
+	code := e.SUCCESS
+	//找到这个用户
+	userDao := dao.NewUserDao(ctx)
+	var err error
+	user, err = userDao.GetUserById(uId)
+	//uodate nickname
+	if service.NickName != "" {
+		user.NickName = service.NickName
+	}
+	err = userDao.UpdateUserById(uId, user)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
 	}
 
 }
