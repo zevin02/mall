@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// 对jwt进行鉴权，判断是否有authorization字段，对jwt合法性校验
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var code int

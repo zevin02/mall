@@ -76,6 +76,7 @@ func UploadAvatar(c *gin.Context) {
 	}
 }
 
+// 发送邮箱
 func SendEmail(c *gin.Context) {
 
 	var sendEmail service.SendEmailService //请求的参数
@@ -85,6 +86,21 @@ func SendEmail(c *gin.Context) {
 		//绑定成功
 		//处理注册逻辑
 		res := sendEmail.Send(c.Request.Context(), claims.ID) //进行注册操作
+		c.JSON(http.StatusOK, res)
+	} else {
+		//绑定失败
+		c.JSON(http.StatusBadRequest, err)
+	}
+}
+
+// 验证邮箱
+func ValidEmail(c *gin.Context) {
+	var validEmail service.ValidEmailService //请求的参数
+	//绑定请求参数，尝试将请求中的数据json/表单数据绑定到userRegister中
+	if err := c.ShouldBind(&validEmail); err == nil {
+		//绑定成功
+		//处理注册逻辑
+		res := validEmail.Valid(c.Request.Context(), c.GetHeader("Authorization")) //进行注册操作
 		c.JSON(http.StatusOK, res)
 	} else {
 		//绑定失败

@@ -56,6 +56,7 @@ func ParseToken(token string) (*Claims, error) {
 type EmailClaims struct {
 	UserID        uint   `json:"user_ID"`
 	Password      string `json:"password"`
+	Email         string `json:"email"`
 	OperationType uint   `json:"operation_type"` //
 	jwt.StandardClaims
 }
@@ -69,6 +70,7 @@ func GenerateEmailToken(userId, Operation uint, email, password string) (string,
 		UserID:        userId,
 		Password:      password,
 		OperationType: Operation,
+		Email:         email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(), //设置过期时间
 			Issuer:    "FanOne-Mall",

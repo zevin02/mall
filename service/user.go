@@ -30,8 +30,83 @@ type SendEmailService struct {
 	//3. 改密码
 }
 
-// 发送邮箱
-func (service *SendEmailService) Send(ctx context.Context, id uint) interface{} {
+type ValidEmailService struct {
+}
+
+// 验证邮箱
+func (service *ValidEmailService) Valid(ctx context.Context, token string) serializer.Response {
+	var userId uint
+	var email string
+	var password string
+	var operationType uint
+	code := e.SUCCESS
+	if token == "" {
+		code = e.InvalidParams
+	} else {
+		//解析token
+		claims, err := util.ParseEmailToken(token)
+		if err != nil {
+			code = e.ErrorAuthToken
+		} else {
+			//从token中解析出来email和处理操作
+			userId = claims.UserID //提取当前是哪个用户
+			email = claims.Email
+			password = claims.Password
+			operationType = claims.OperationType
+		}
+
+	}
+	if code != e.SUCCESS {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	//获取用户的信息
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserById(userId)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	if operationType == 1 {
+		//绑定邮箱
+		user.Email = email
+	} else if operationType == 2 {
+		//解除绑定
+		user.Email = ""
+	} else if operationType == 3 {
+		err = user.SetPassword(password)
+		if err != nil {
+			code = e.ERROR
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+	}
+	err = userDao.UpdateUserById(userId, user)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
+	}
+
+}
+
+// 发送邮箱,这个id就是通过从登陆态的token中解析出来的
+func (service *SendEmailService) Send(ctx context.Context, id uint) serializer.Response {
 	code := e.SUCCESS
 	var address string       //用于保存发送通知的邮箱地址
 	var notice *model.Notice //绑定邮箱，修改密码，模板通知，用于邮件内容
