@@ -2,12 +2,15 @@ package service
 
 import (
 	"context"
+	"gopkg.in/mail.v2"
+	"mall/conf"
 	"mall/dao"
 	"mall/model"
 	"mall/pkg/e"
 	"mall/pkg/util"
 	"mall/serializer"
 	"mime/multipart"
+	"strings"
 )
 
 type UserService struct {
@@ -15,6 +18,72 @@ type UserService struct {
 	UserName string `json:"user_name" form:"user_name"`
 	Password string `json:"password" form:"password"`
 	Key      string `json:"key" form:"key"` //前端验证
+}
+
+type SendEmailService struct {
+	Email         string `json:"email" form:"email"`
+	Password      string `json:"password" form:"password"`
+	OperationType uint   `json:"operation_type" form:"operation_type"`
+	// 这个直接和notice中的id进行对应
+	//1. 绑定邮箱
+	//2. 解除绑定邮箱
+	//3. 改密码
+}
+
+// 发送邮箱
+func (service *SendEmailService) Send(ctx context.Context, id uint) interface{} {
+	code := e.SUCCESS
+	var address string       //用于保存发送通知的邮箱地址
+	var notice *model.Notice //绑定邮箱，修改密码，模板通知，用于邮件内容
+	//生成用于邮箱验证或密码重置的令牌
+	//根据当前的请求生成对应的token，之后通过检查当前的这个token来设置这个对应的操作
+	token, err := util.GenerateEmailToken(id, service.OperationType, service.Email, service.Password)
+	if err != nil {
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	noticeDao := dao.NewNoticeDao(ctx)
+	//根据操作的类型，获取通知
+	notice, err = noticeDao.GetNoticeById(service.OperationType)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	address = conf.ValidEmail + token //发送方邮件地址和令牌
+
+	mailStr := notice.Text //获取邮件模板文本
+	//题换Email为实际的邮件地址
+	mailTex := strings.Replace(mailStr, "Email", address, -1)
+	m := mail.NewMessage()
+	m.SetHeader("From", conf.SmtpEmail) //设置发送人的邮箱地址和
+	m.SetHeader("To", service.Email)    //设置接收人的邮箱地址
+	m.SetHeader("Subject", "FanOne")    //设置邮件的主题
+	m.SetBody("text/html", mailTex)     //设置邮箱内容
+	//创建smtp拨号其并配置
+	d := mail.NewDialer(conf.SmtpHost, 465, conf.SmtpEmail, conf.SmtpPass)
+	d.StartTLSPolicy = mail.MandatoryStartTLS
+	//尝试发送有哦间
+
+	if err := d.DialAndSend(m); err != nil {
+		code = e.ErrorSendEmail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+
 }
 
 // Register 用户注册函数,里面包含了从gin里面提取的请求参数
@@ -158,7 +227,7 @@ func (service *UserService) Update(ctx context.Context, uId uint) serializer.Res
 func (service *UserService) Post(ctx context.Context, id uint, file multipart.File, size int64) serializer.Response {
 	code := e.SUCCESS
 	userDao := dao.NewUserDao(ctx)
-	user, err := userDao.GetUserById(id)
+	user, err := userDao.GetUserById(id) //根据主键id get user info
 	if err != nil {
 		code = e.ERROR
 		return serializer.Response{

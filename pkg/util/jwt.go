@@ -52,3 +52,48 @@ func ParseToken(token string) (*Claims, error) {
 	//解析失败
 	return nil, err
 }
+
+type EmailClaims struct {
+	UserID        uint   `json:"user_ID"`
+	Password      string `json:"password"`
+	OperationType uint   `json:"operation_type"` //
+	jwt.StandardClaims
+}
+
+// 签发email token
+func GenerateEmailToken(userId, Operation uint, email, password string) (string, error) {
+	nowTime := time.Now()
+	expireTime := nowTime.Add(24 * time.Hour) //must be expired or be dangerous
+	//设置claims令牌
+	claims := EmailClaims{
+		UserID:        userId,
+		Password:      password,
+		OperationType: Operation,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expireTime.Unix(), //设置过期时间
+			Issuer:    "FanOne-Mall",
+		},
+	}
+	//创建一个jwt token
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := tokenClaims.SignedString(jwtSecret) //token生成
+	return token, err
+
+}
+
+// ParseEmailToken 验证用户的token，解析JWT令牌并返回声明的信息
+func ParseEmailToken(token string) (*EmailClaims, error) {
+	//
+	tokenClaims, err := jwt.ParseWithClaims(token, &EmailClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+	//检查解析是否成功
+	if tokenClaims != nil {
+		//尝试将Claims转化成Claims类型，并检查令牌的有效性
+		if claims, ok := tokenClaims.Claims.(*EmailClaims); ok && tokenClaims.Valid {
+			return claims, nil
+		}
+	}
+	//解析失败
+	return nil, err
+}

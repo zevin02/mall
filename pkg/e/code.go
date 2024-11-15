@@ -12,7 +12,5 @@ const (
 	ErrorAuthToken     = 1005
 	ErrorExpiredToken  = 1006
 	ErrorUploadFail    = 1007
+	ErrorSendEmail     = 1008
 )
-
-
-
