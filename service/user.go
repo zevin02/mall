@@ -33,6 +33,30 @@ type SendEmailService struct {
 type ValidEmailService struct {
 }
 
+type ShowMoneyService struct {
+	Key string `json:"key" form:"key"`
+}
+
+// 展示用户金额
+func (service *ShowMoneyService) ShowMoney(ctx context.Context, uId uint) serializer.Response {
+	code := e.SUCCESS
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserById(uId)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildMoney(user, service.Key),
+	}
+
+}
+
 // 验证邮箱
 func (service *ValidEmailService) Valid(ctx context.Context, token string) serializer.Response {
 	var userId uint

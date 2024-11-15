@@ -97,10 +97,27 @@ func SendEmail(c *gin.Context) {
 func ValidEmail(c *gin.Context) {
 	var validEmail service.ValidEmailService //请求的参数
 	//绑定请求参数，尝试将请求中的数据json/表单数据绑定到userRegister中
+
 	if err := c.ShouldBind(&validEmail); err == nil {
 		//绑定成功
 		//处理注册逻辑
 		res := validEmail.Valid(c.Request.Context(), c.GetHeader("Authorization")) //进行注册操作
+		c.JSON(http.StatusOK, res)
+	} else {
+		//绑定失败
+		c.JSON(http.StatusBadRequest, err)
+	}
+}
+
+func ShowMoney(c *gin.Context) {
+	var showMoney service.ShowMoneyService //请求的参数
+	//绑定请求参数，尝试将请求中的数据json/表单数据绑定到userRegister中
+	claims, _ := util.ParseToken(c.GetHeader("Authorization")) //根据token获得当前的各种信息
+
+	if err := c.ShouldBind(&showMoney); err == nil {
+		//绑定成功
+		//处理注册逻辑
+		res := showMoney.ShowMoney(c.Request.Context(), claims.ID) //进行注册操作
 		c.JSON(http.StatusOK, res)
 	} else {
 		//绑定失败
