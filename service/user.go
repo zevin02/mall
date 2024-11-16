@@ -17,7 +17,7 @@ type UserService struct {
 	NickName string `json:"nick_name" form:"nick_name"`
 	UserName string `json:"user_name" form:"user_name"`
 	Password string `json:"password" form:"password"`
-	Key      string `json:"key" form:"key"` //前端验证
+	Key      string `json:"key" form:"key"` //前端验证,相当于是支付密码，使用这个进行加解密
 }
 
 type SendEmailService struct {
