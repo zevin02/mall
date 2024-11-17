@@ -13,4 +13,7 @@ const (
 	ErrorExpiredToken  = 1006
 	ErrorUploadFail    = 1007
 	ErrorSendEmail     = 1008
+
+	//product
+	ErrorUploadProduct = 2001
 )

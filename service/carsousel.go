@@ -4,6 +4,7 @@ import (
 	"context"
 	"mall/dao"
 	"mall/pkg/e"
+	"mall/pkg/util"
 	"mall/serializer"
 )
 
@@ -15,6 +16,7 @@ func (service *CarouselService) ListCarousel(ctx context.Context) serializer.Res
 	code := e.SUCCESS
 	carousels, err := carouselDao.ListCarousel()
 	if err != nil {
+		util.LogrusObj.Infoln("err", err)
 		code = e.ERROR
 		return serializer.Response{
 			Status: code,
