@@ -30,3 +30,14 @@ func (dao *ProductDao) CreateProduct(product *model.Product) error {
 	return dao.DB.Model(&model.Product{}).Create(&product).Error
 
 }
+
+func (dao *ProductDao) CountProductByCond(condition map[string]interface{}) (total int64, err error) {
+	err = dao.DB.Model(&model.Product{}).Where(condition).Count(&total).Error
+	return total, err
+}
+
+func (dao *ProductDao) ListProductByCond(condition map[string]interface{}, page model.BasePage) (products []*model.Product, err error) {
+	err = dao.DB.Model(&model.Product{}).Where(condition).Limit(page.PageSize).Offset(page.PageSize * (page.PageNum - 1)).Find(&products).Error
+	return
+
+}

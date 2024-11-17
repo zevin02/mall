@@ -9,6 +9,7 @@ import (
 	"mall/serializer"
 	"mime/multipart"
 	"strconv"
+	"sync"
 )
 
 type ProductService struct {
@@ -93,7 +94,43 @@ func (service *ProductService) Create(ctx context.Context, uId uint, files []*mu
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildProduct(product),
+		Data:   serializer.BuildProduct(&product),
 	}
+
+}
+
+func (service *ProductService) List(ctx context.Context) serializer.Response {
+	var products []*model.Product //商品都是商家创建的
+	var err error
+
+	code := e.SUCCESS
+	//分页功能
+	if service.PageSize == 0 {
+		service.PageSize = 10
+	}
+	condition := make(map[string]interface{})
+	if service.CategoryId != 0 {
+		condition["category"] = service.CategoryId
+	}
+	productDao := dao.NewProductDao(ctx)
+	total, err := productDao.CountProductByCond(condition)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewProductDaoByDB(productDao.DB)
+		products, _ = productDao.ListProductByCond(condition, service.BasePage)
+
+		wg.Done()
+	}()
+	wg.Wait()
+	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(total))
 
 }

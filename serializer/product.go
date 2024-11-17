@@ -21,7 +21,7 @@ type Product struct {
 }
 
 // 序列化商品
-func BuildProduct(item model.Product) Product {
+func BuildProduct(item *model.Product) Product {
 	return Product{
 		ID:           item.ID,
 		Name:         item.Name,
@@ -39,4 +39,12 @@ func BuildProduct(item model.Product) Product {
 		BossName:     item.BossName,
 		BossAvatar:   item.BossAvatar,
 	}
+}
+
+func BuildProducts(items []*model.Product) (products []Product) {
+	for _, item := range items {
+		product := BuildProduct(item)
+		products = append(products, product)
+	}
+	return products
 }
