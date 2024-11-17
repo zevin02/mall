@@ -134,3 +134,20 @@ func (service *ProductService) List(ctx context.Context) serializer.Response {
 	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(total))
 
 }
+
+func (service *ProductService) Search(ctx context.Context) serializer.Response {
+	code := e.SUCCESS
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	productDao := dao.NewProductDao(ctx)
+	products, count, err := productDao.SearchProduct(service.Title, service.BasePage)
+	if err != nil {
+		code = e.ERROR
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(count))
+}

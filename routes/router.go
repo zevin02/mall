@@ -39,8 +39,9 @@ func NewRouter() *gin.Engine {
 			authed.POST("user/valid-email", api.ValidEmail)  //发送邮件
 
 			//显示金额
-			authed.POST("user/show_money", api.ShowMoney)    //发送邮件
-			authed.POST("product/create", api.CreateProduct) //发送邮件
+			authed.POST("user/show_money", api.ShowMoney)    //展示金额
+			authed.POST("product/create", api.CreateProduct) //创建商品
+			authed.POST("product/search", api.SearchProduct) //创建商品
 
 		}
 
