@@ -16,4 +16,7 @@ const (
 
 	//product
 	ErrorUploadProduct = 2001
+
+	//favorite
+	ErrorExistFavorite = 3001
 )

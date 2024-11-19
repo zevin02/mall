@@ -11,6 +11,7 @@ var MsgFlags = map[int]string{
 	ErrorAuthToken:     "token验证失败",
 	ErrorExpiredToken:  "token过期",
 	ErrorUploadFail:    "上传文件失败",
+	ErrorExistFavorite: "收藏夹已存在",
 }
 
 // GetMsg 获取状态码对应信息
