@@ -27,7 +27,9 @@ func NewRouter() *gin.Engine {
 		v1.POST("user/login", api.UserLogin)
 		v1.POST("carousels", api.ListCarousel) //展示所有的商品信息
 
-		v1.GET("products", api.ListProduct) //展示所有的商品信息
+		v1.GET("products", api.ListProduct)    //展示所有的商品信息
+		v1.GET("product/:id", api.ShowProduct) //展示所有的商品信息
+		v1.GET("imgs/:id", api.ListProductImg) //展示所有的商品信息
 		//
 		authed := v1.Group("/") //需要登陆保护
 		//意味着authed这个路由组下的所有请求都需要经过JWTAuth中间件

@@ -54,3 +54,9 @@ func (dao *ProductDao) SearchProduct(info string, page model.BasePage) (products
 		Find(&products).Error
 	return
 }
+
+func (dao *ProductDao) GetProductById(id uint) (user *model.Product, err error) {
+	//First 用于检索满足条件的第一条记录
+	err = dao.DB.Model(&model.Product{}).Where("id=?", id).First(&user).Error
+	return user, err
+}
