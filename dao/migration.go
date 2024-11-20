@@ -19,7 +19,7 @@ func migration() {
 		&model.Notice{},
 		&model.Product{},
 		&model.ProductImg{},
-		&model.Order{},
+		&model.Orders{},
 		&model.Favorite{},
 	)
 

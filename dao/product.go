@@ -60,3 +60,7 @@ func (dao *ProductDao) GetProductById(id uint) (user *model.Product, err error) 
 	err = dao.DB.Model(&model.Product{}).Where("id=?", id).First(&user).Error
 	return user, err
 }
+
+func (dao *ProductDao) UpdateProductById(id uint, product *model.Product) error {
+	return dao.DB.Model(&model.Product{}).Where("id=?", id).Updates(product).Error
+}

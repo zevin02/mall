@@ -2,8 +2,13 @@ package model
 
 import "gorm.io/gorm"
 
+const (
+	NOTPAY = 1
+	PAYED  = 2
+)
+
 // 订单模型
-type Order struct {
+type Orders struct {
 	gorm.Model
 	UserId    uint `gorm:"not null"`
 	BOssId    uint `gorm:"not null"`
