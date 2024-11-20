@@ -30,3 +30,8 @@ func (dao *FavoriteDao) DeleteFavorite(favorite *model.Favorite) error {
 	//直接这样创建即可
 	return dao.DB.Delete(&favorite).Error
 }
+
+func (dao *FavoriteDao) ListFavorite(userId uint) (favorite []*model.Favorite, err error) {
+	err = dao.DB.Model(&model.Favorite{}).Where("user_id = ?", userId).Find(&favorite).Error
+	return
+}

@@ -105,8 +105,9 @@ func (service *FavoritesService) Delete(ctx context.Context, uid uint, pid strin
 
 }
 
+// 查看当前用户的所有收藏
 func (service *FavoritesService) Show(ctx context.Context, id uint) serializer.Response {
-	var favorites []model.Favorite
+	var favorites []*model.Favorite
 	var total int64
 	code := e.SUCCESS
 	if service.PageSize == 0 {
@@ -121,7 +122,8 @@ func (service *FavoritesService) Show(ctx context.Context, id uint) serializer.R
 			Msg:    e.GetMsg(code),
 		}
 	}
-	err := favoriteDao.DB.Model(model.User{}).Preload("User").Where("user_id=?", id).Offset((service.PageNum - 1) * service.PageSize).Limit(service.PageSize).Find(&favorites).Error
+	favorites, err := favoriteDao.ListFavorite(id)
+
 	if err != nil {
 		code = e.ERROR
 		return serializer.Response{
@@ -129,9 +131,6 @@ func (service *FavoritesService) Show(ctx context.Context, id uint) serializer.R
 			Msg:    e.GetMsg(code),
 		}
 	}
-	return serializer.Response{
-		Status: code,
-		Msg:    e.GetMsg(code),
-	}
+	return serializer.BuildListResponse(serializer.BuildFavorites(ctx, favorites), uint(total))
 
 }
