@@ -3,6 +3,7 @@ package util
 import (
 	"github.com/sirupsen/logrus"
 	"log"
+	"mall/model"
 	"os"
 	"path"
 	"time"
@@ -27,10 +28,11 @@ func init() {
 		TimestampFormat: "2006-01-02 15:04:05", //时间格式
 	}) //设置格式
 	//加个hook形成elk体系，将日志写入到es中，方便后续对日志的查看
-	//hook := model.EsHookLog()
-	//logger.AddHook(hook)
+	hook := model.EsHookLog()
+	logger.AddHook(hook)
 	//后续的
 	LogrusObj = logger
+	LogrusObj.Infoln("hello")
 }
 
 // 返回一个文件
@@ -52,9 +54,11 @@ func setOutPutFile() (*os.File, error) {
 	logFileName := now.Format("2006-01-02") + ".log" //文件名
 	//日志文件
 	fileName := path.Join(logFilePath, logFileName)
-	if os.IsNotExist(err) {
+
+	//check if this file exist
+	if _, err := os.Stat(fileName); err != nil {
 		//当前路径不存在，就创建
-		if err = os.MkdirAll(fileName, 0777); err != nil {
+		if _, err := os.Create(fileName); err != nil {
 			log.Println(err.Error())
 			return nil, err
 		}

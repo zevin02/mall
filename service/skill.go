@@ -58,7 +58,6 @@ func (service *SkillGoodsService) SkillGoods(ctx context.Context, id uint) seria
 	err := RedissionSecSkillGoods(sk)
 	if err != nil {
 		return serializer.Response{}
-
 	}
 	return serializer.Response{}
 

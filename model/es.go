@@ -13,7 +13,7 @@ var EsClient *elastic.Client
 const (
 	esHost  string = "127.0.0.1"
 	esPort  string = "9200"
-	esIndex        = "mylog"
+	esIndex        = "mylog" //使用的索引名称
 )
 
 func init() {
