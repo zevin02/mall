@@ -3,7 +3,6 @@ package util
 import (
 	"github.com/sirupsen/logrus"
 	"log"
-	"mall/model"
 	"os"
 	"path"
 	"time"
@@ -28,8 +27,8 @@ func init() {
 		TimestampFormat: "2006-01-02 15:04:05", //时间格式
 	}) //设置格式
 	//加个hook形成elk体系，将日志写入到es中，方便后续对日志的查看
-	hook := model.EsHookLog()
-	logger.AddHook(hook)
+	//hook := model.EsHookLog()
+	//logger.AddHook(hook)
 	//后续的
 	LogrusObj = logger
 }

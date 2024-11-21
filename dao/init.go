@@ -15,7 +15,8 @@ var (
 	_db *gorm.DB //gorm的全局变量
 )
 
-func Database(connRead, connWrite string) {
+// 初始化mysql
+func InitMySQL(connRead, connWrite string) {
 	var ormLogger logger.Interface
 	if gin.Mode() == "debug" {
 		ormLogger = logger.Default.LogMode(logger.Info)

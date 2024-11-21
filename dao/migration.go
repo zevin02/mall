@@ -21,6 +21,8 @@ func migration() {
 		&model.ProductImg{},
 		&model.Orders{},
 		&model.Favorite{},
+		&model.SkillGoods{},
+		
 	)
 
 	if err != nil {

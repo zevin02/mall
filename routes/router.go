@@ -57,6 +57,11 @@ func NewRouter() *gin.Engine {
 			//authed.GET("orders", api.ShowOrder)          //查看当前用户的所有的收藏夹藏品
 			authed.POST("orders", api.CreateOrder) //
 			//authed.DELETE("orders/:id", api.DeleteOrder) //
+
+			//秒杀
+			authed.POST("init_skill_goods", api.InitSkillGoods) //
+			authed.POST("skill_goods", api.SkillGoods)          //进行秒杀操作
+
 		}
 
 	}

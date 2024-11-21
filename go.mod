@@ -10,6 +10,7 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/sirupsen/logrus v1.9.3
+	github.com/streadway/amqp v1.1.0
 	golang.org/x/crypto v0.29.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/mail.v2 v2.3.1

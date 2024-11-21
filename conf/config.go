@@ -3,6 +3,7 @@ package conf
 import (
 	"gopkg.in/ini.v1"
 	"mall/dao"
+	"mall/mq"
 	"strings"
 )
 
@@ -30,6 +31,13 @@ var (
 	Host        string
 	ProductPath string
 	AvatarPath  string
+
+	//mq相关的配置
+	RabbitMQ         string
+	RabbitMQUser     string
+	RabbitMQPassWord string
+	RabbitMQHost     string
+	RabbitMQPort     string
 )
 
 // Init init config and db conncection
@@ -45,6 +53,7 @@ func Init() {
 	LoadEmail(file)
 	LoadRedis(file)
 	LoadPhotoPath(file)
+	LoadRabbitMQ(file)
 
 	//mysql的读写分离
 	//mysql 读 主,构建用于读取数据的mysql连接的字符串
@@ -53,8 +62,17 @@ func Init() {
 	//mysql 写 (主从复制)，构建用于写的myslq的字符串
 	pathWrite := strings.Join([]string{DbUser, ":", DbPassword, "@tcp(", DbHost, ":", DbPort, ")/", DbName, "?charset=utf8mb4&parseTime=True&loc=Local"}, "")
 	//传入读写连接字符串以初始化数据库连接
-	dao.Database(pathRead, pathWrite)
+	dao.InitMySQL(pathRead, pathWrite)
+	mq.InitRabbitMQ()
 
+}
+
+func LoadRabbitMQ(file *ini.File) {
+	RabbitMQ = file.Section("rabbitmq").Key("RabbitMQ").String()
+	RabbitMQUser = file.Section("rabbitmq").Key("RabbitMQUser").String()
+	RabbitMQPassWord = file.Section("rabbitmq").Key("RabbitMQPassWord").String()
+	RabbitMQHost = file.Section("rabbitmq").Key("RabbitMQHost").String()
+	RabbitMQPort = file.Section("rabbitmq").Key("RabbitMQPort").String()
 }
 
 func LoadPhotoPath(file *ini.File) {
