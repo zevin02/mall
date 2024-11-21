@@ -32,7 +32,7 @@ func (service *SkillGoodsService) InitSkillGoods(ctx context.Context) interface{
 	r := cache.RedisClient
 	//加载到redis中
 	for i := range skillGoods {
-		util.LogrusObj.Infoln(*skillGoods[i])
+		util.LogrusObj.Info(*skillGoods[i])
 		//给SK+ id这个key创建一个hash，两个field分别是num和money,将mysql中的数据导入到redis中
 		r.HSet("SK"+strconv.Itoa(int(skillGoods[i].Id)), "num", skillGoods[i].Num)
 		r.HSet("SK"+strconv.Itoa(int(skillGoods[i].Id)), "money", skillGoods[i].Money)
@@ -65,7 +65,7 @@ func (service *SkillGoodsService) SkillGoods(ctx context.Context, id uint) seria
 }
 
 // 加锁
-func RedissionSecSkillGoods(sk *model.SkillGood2MQ) interface{} {
+func RedissionSecSkillGoods(sk *model.SkillGood2MQ) error {
 	p := strconv.Itoa(int(sk.ProductId)) //根据商品id来提取
 	uuid := getUuid(p)
 	_, err := cache.RedisClient.Del(p).Result() //先提前将这个uuid correspongding key delete
@@ -87,10 +87,10 @@ func RedissionSecSkillGoods(sk *model.SkillGood2MQ) interface{} {
 		//对比看当前锁是否被更换，相等就可以删除这把锁了
 		_, err := cache.RedisClient.Del(p).Result()
 		if err != nil {
-			util.LogrusObj.Infoln("unlock fail")
+			util.LogrusObj.Info("unlock fail")
 			return nil
 		} else {
-			util.LogrusObj.Infoln("unlock success")
+			util.LogrusObj.Info("unlock success")
 		}
 	}
 	return nil
@@ -124,7 +124,7 @@ func SendSecSkillSToMQ(sk *model.SkillGood2MQ) error {
 		err = errors.New("rabbitMQ err:" + err.Error())
 		return err
 	}
-	util.LogrusObj.Infoln(body)
+	util.LogrusObj.Info(body)
 	return nil
 }
 
@@ -149,11 +149,15 @@ func getUuid(gid string) string {
 func MQ2MySQL() error {
 	//redis
 	r := cache.RedisClient
-	ch, _ := mq.RabbitMQ.Channel() //打开当前的mq的channel
+	ch, err := mq.RabbitMQ.Channel() //打开当前的mq的channel
+	if err != nil {
+		panic(err)
+	}
 	//确保skill_goods队列的存在
-	q, _ := ch.QueueDeclare("skill_goods", true, false, false, false, nil)
+	q, err := ch.QueueDeclare("skill_goods", true, false, false, false, nil)
 	_ = ch.Qos(1, 0, false) //消费者设置了通道的服务质量，确保消费者一次只处理一条消息
 	msgs, _ := ch.Consume(q.Name, "", false, false, false, false, nil)
+	//消费者不断等待数据到来
 	for d := range msgs {
 		//这个d就是消费测获得的消息
 		//消费者开始消费
@@ -168,9 +172,9 @@ func MQ2MySQL() error {
 		//redis扣除库存
 		r.HIncrBy(strconv.Itoa(int(p.SkillGoodId)), "num", -1) //数量-1
 
-		util.LogrusObj.Infoln("Done")
+		util.LogrusObj.Info("Done")
 		d.Ack(false) //消息处理完之后，对当前消息确认ack
 	}
-	//
+
 	return nil
 }
